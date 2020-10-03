@@ -1,2 +1,0 @@
-LiquidCrystal_I2C.h --> "http://www.giuseppecaccavale.it/arduino/display-lcd-i2c-pcf8574t-arduino/"
-DHT.h --> "https://github.com/adafruit/DHT-sensor-library"  o marketplace Arduino IDE
