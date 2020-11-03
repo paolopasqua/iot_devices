@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: smart-sensors-utility
+Version: 0.0.2
+Summary: Utility code for Smart Sensors project.
+Home-page: UNKNOWN
+Author: Paolo Pasquali
+Author-email: paolo.pasquali@outlook.it
+License: UNKNOWN
+Description: # Smart Sensors Utility
+        
+        This is a simple package containing the utility code.
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GNU GPLv3
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
