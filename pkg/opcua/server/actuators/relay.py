@@ -1,8 +1,8 @@
-
-from .actuator import OPCUA_Actuator
+#relay.py
+from .actuator import sOPCUA_Actuator
 import RPi.GPIO as GPIO
 
-class OPCUA_Relay_Actuator(OPCUA_Actuator):
+class sOPCUA_Relay(sOPCUA_Actuator):
     """
         Class to manage a RELAY actuator into an OPCUA server
     """
@@ -14,13 +14,12 @@ class OPCUA_Relay_Actuator(OPCUA_Actuator):
         GPIO.setup(self.__pin, GPIO.OUT)
         GPIO.output(self.__pin, GPIO.LOW)
 
-    def build_object(self, idx, opcua_object):
-        super().build_object(idx, opcua_object)
+        self.turn_on.connect(self.__turn_on__)
+        self.turn_off.connect(self.__turn_off__)
+        
     
     def __turn_on__(self, parent):
-        super().__turn_on__(parent)
         GPIO.output(self.__pin, GPIO.HIGH)
 
     def __turn_off__(self, parent):
-        super().__turn_off__(parent)
         GPIO.output(self.__pin, GPIO.LOW)

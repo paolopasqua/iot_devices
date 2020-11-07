@@ -1,55 +1,66 @@
-from smart_sensors_utility import LoggerUtility
-from opcua import ua, uamethod, Server
+# from smart_sensors_utility import LoggerUtility
+# from opcua import ua, uamethod, Server
 
-from pkg.opcua.sensors import OPCUA_DHT11_Sensor
-from pkg.opcua.actuators import OPCUA_Relay_Actuator
+from pkg.opcua.server.actuators import sOPCUA_Actuator
+from pkg.opcua.server import sOPCUA_Device
 
 
 def main():
 
-    log = LoggerUtility.get_logger("dht11.log")
+    a = sOPCUA_Actuator('actuator', 'test')
+    # b = sOPCUA_Actuator('actuator', 'test2')
+    print(a.tag)
+    print(a.name)
+    print("1",a.state)
+    a.turn_on()
+    print("2",a.state)
+    a.turn_off()
+    print("3",a.state)
 
-    log.info("**************************** START ****************************")
 
-    # setup our server
-    server = Server()
-    server.set_endpoint("opc.tcp://0.0.0.0:4840/freeopcua/server/")
+    # log = LoggerUtility.get_logger("dht11.log")
 
-    # setup our own namespace, not really necessary but should as spec
-    uri = "http://paolopasqua.site"
-    idx = server.register_namespace(uri)
+    # log.info("**************************** START ****************************")
 
-    # get Objects node, this is where we should put our nodes
-    objects = server.get_objects_node()
+    # # setup our server
+    # server = Server()
+    # server.set_endpoint("opc.tcp://0.0.0.0:4840/freeopcua/server/")
 
-    d = OPCUA_DHT11_Sensor("D24","test")
-    d.append_to_server(idx, objects)
+    # # setup our own namespace, not really necessary but should as spec
+    # uri = "http://paolopasqua.site"
+    # idx = server.register_namespace(uri)
 
-    #26 19 13 6
-    r1 = OPCUA_Relay_Actuator(26,"1")
-    r1.append_to_server(idx, objects)
+    # # get Objects node, this is where we should put our nodes
+    # objects = server.get_objects_node()
+
+    # d = OPCUA_DHT11_Sensor("D24","test")
+    # d.append_to_server(idx, objects)
+
+    # #26 19 13 6
+    # r1 = OPCUA_Relay_Actuator(26,"1")
+    # r1.append_to_server(idx, objects)
     
-    r2 = OPCUA_Relay_Actuator(19,"2")
-    r2.append_to_server(idx, objects)
+    # r2 = OPCUA_Relay_Actuator(19,"2")
+    # r2.append_to_server(idx, objects)
     
-    r3 = OPCUA_Relay_Actuator(13,"3")
-    r3.append_to_server(idx, objects)
+    # r3 = OPCUA_Relay_Actuator(13,"3")
+    # r3.append_to_server(idx, objects)
 
-    r4 = OPCUA_Relay_Actuator(6,"4")
-    r4.append_to_server(idx, objects)
+    # r4 = OPCUA_Relay_Actuator(6,"4")
+    # r4.append_to_server(idx, objects)
     
-    shutdown = False
+    # shutdown = False
 
-    try:
+    # try:
     
-        server.start()
-        while not shutdown:
-            pass
+    #     server.start()
+    #     while not shutdown:
+    #         pass
 
-    finally:
-        #close connection, remove subcsriptions, etc
-        d.exit()
-        server.stop()
+    # finally:
+    #     #close connection, remove subcsriptions, etc
+    #     d.exit()
+    #     server.stop()
 
 if __name__ == "__main__":
     main()
