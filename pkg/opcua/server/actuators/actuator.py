@@ -10,13 +10,13 @@ class sOPCUA_Actuator(sOPCUA_Device):
     STATE_OFF = "Off"
     STATE_ON = "On"
     
-    KEY_TURN_ON = 'turn_on'
-    KEY_TURN_OFF = 'turn_off'
+    MKEY_TURN_ON = 'turn_on'
+    MKEY_TURN_OFF = 'turn_off'
 
-    sOPCUA_Device.class_init({},
-                             {KEY_TURN_ON:{'input':[],'output':[]},
-                              KEY_TURN_OFF:{'input':[],'output':[]}
-                             })
+    # class_init({},
+    #                          {MKEY_TURN_ON:{'input':[],'output':[]},
+    #                           MKEY_TURN_OFF:{'input':[],'output':[]}
+    #                          })
 
 
     def __init__(self, category, tag):
@@ -29,9 +29,16 @@ class sOPCUA_Actuator(sOPCUA_Device):
 
             tag      string identifier for the actuator
         """
-        super().__init__(category, tag)
+        super().__init__(
+                        category, 
+                        tag, 
+                        {},
+                        {
+                            self.MKEY_TURN_ON:{'input':[],'output':[]},
+                            self.MKEY_TURN_OFF:{'input':[],'output':[]}
+                        })
         self.state = self.STATE_OFF
 
-        self.turn_on.connect(lambda n,p=None: setattr(self,'state',self.STATE_ON))
-        self.turn_off.connect(lambda n,p=None: setattr(self,'state',self.STATE_OFF))
+        self.turn_on.connect(lambda n,p=None: setattr(self,sOPCUA_Device.KEY_STATE,self.STATE_ON))
+        self.turn_off.connect(lambda n,p=None: setattr(self,sOPCUA_Device.KEY_STATE,self.STATE_OFF))
 

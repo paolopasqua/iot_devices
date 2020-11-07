@@ -18,8 +18,8 @@ class sOPCUA_Relay(sOPCUA_Actuator):
         self.turn_off.connect(self.__turn_off__)
         
     
-    def __turn_on__(self, parent):
+    def __turn_on__(self, parent, ua_parent):
         GPIO.output(self.__pin, GPIO.HIGH)
 
-    def __turn_off__(self, parent):
+    def __turn_off__(self, parent, ua_parent):
         GPIO.output(self.__pin, GPIO.LOW)

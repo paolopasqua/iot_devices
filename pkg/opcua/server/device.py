@@ -13,30 +13,10 @@ class sOPCUA_Device(ABC):
     ''' Key value to identify the STATE attribute '''
     KEY_STATE = 'state'
     
-
-    __attributes = {}
-    __methods = {}
+    __attributes = None
+    __methods = None
     
-    @staticmethod
-    def class_init(attributes: "Dict[str,ua.VariantType]", methods: "Dict[str,Dict['input':List[ua.Argument],'output':List[ua.Argument],'action':callable]]"):
-        '''
-        Static method: inits the class with the attributes and methods.
-        '''
-        for a in attributes:
-            sOPCUA_Device.__attributes[a] = DynamicAttribute(a, attributes[a], None)
-            sOPCUA_Device.__attributes[a].delete.connect(sOPCUA_Device.__remove_attribute__)
-            sOPCUA_Device.__attributes[a].set_value.connect(sOPCUA_Device.__set_attribute_value__)
-            setattr(__class__,a,property(sOPCUA_Device.__attributes[a].get_value,sOPCUA_Device.__attributes[a].set_value,sOPCUA_Device.__attributes[a].delete,a))
-        
-        for m in methods:
-            sOPCUA_Device.__methods[m] = DynamicMethod(str(__class__), m, methods[m]['input'], methods[m]['output'])
-            sOPCUA_Device.__methods[m].delete.connect(sOPCUA_Device.__remove_method__)
-            if 'action' in methods[m] and callable(methods[m]['action']):
-                sOPCUA_Device.__methods[m].connect(methods[m]['action'])
-            setattr(__class__,m,property(sOPCUA_Device.__methods[m].get,None,sOPCUA_Device.__methods[m].delete,m))
-
-
-    def __init__(self, category: str, tag: str):
+    def __init__(self, category: str, tag: str, attributes: "Dict[str,ua.VariantType]", methods: "Dict[str,Dict['input':List[ua.Argument],'output':List[ua.Argument],'action':callable]]"):
         """
         Constructor.
 
@@ -46,6 +26,8 @@ class sOPCUA_Device(ABC):
 
         tag:         string to identify the device
         """
+        self.__class_init__(attributes,methods)
+
         self.__state = None
         self.__tag = tag
         self.__name = "%s_%s" % (category, self.__tag)
@@ -110,7 +92,7 @@ class sOPCUA_Device(ABC):
 
         objects_node    destination node of the object
         '''
-        opcua_object = objects_node.add_object(idx, self.get_name())
+        opcua_object = objects_node.add_object(idx, self.name)
         
         self.get_server(idx)[sOPCUA_Device.KEY_STATE] = opcua_object.add_property(idx, sOPCUA_Device.KEY_STATE, self.state, ua.VariantType.String)
 
@@ -120,10 +102,31 @@ class sOPCUA_Device(ABC):
         for m in self.__methods:
             opcua_object.add_method(idx, m, getattr(self,m), self.__methods[m].input_par, self.__methods[m].output_par)
     
+    def __class_init__(self, attributes: "Dict[str,ua.VariantType]", methods: "Dict[str,Dict['input':List[ua.Argument],'output':List[ua.Argument],'action':callable]]"):
+        '''
+        Inits the class with the attributes and methods.
+        '''
+        if not self.__class__.__attributes:
+            self.__class__.__attributes = {}
+            for a in attributes:
+                self.__class__.__attributes[a] = DynamicAttribute(a, attributes[a])
+                self.__class__.__attributes[a].delete.connect(self.__class__.__remove_attribute__)
+                self.__class__.__attributes[a].set_value.connect(self.__class__.__set_attribute_value__)
+                setattr(self.__class__,a,property(self.__class__.__attributes[a].get_value,self.__class__.__attributes[a].set_value,self.__class__.__attributes[a].delete,a))
+        
+        if not self.__class__.__methods:
+            self.__class__.__methods = {}
+            for m in methods:
+                self.__class__.__methods[m] = DynamicMethod(str(__class__), m, methods[m]['input'], methods[m]['output'])
+                self.__class__.__methods[m].delete.connect(self.__class__.__remove_method__)
+                if 'action' in methods[m] and callable(methods[m]['action']):
+                    self.__class__.__methods[m].connect(methods[m]['action'])
+                setattr(self.__class__,m,property(self.__class__.__methods[m].get,None,self.__class__.__methods[m].delete,m))
+
     @staticmethod
     def __set_attribute_value__(attr: str, instance: "instance reference", value: "dynamic type"):
         '''
-        Static method: updates with the value param all the components identified by attr param to instance's servers
+        Updates with the value param all the components identified by attr param to instance's servers
 
         Args
         ----
@@ -138,17 +141,17 @@ class sOPCUA_Device(ABC):
     @staticmethod
     def __remove_attribute__(attribute, instance):
         '''
-        Static method: removes the attribute identified by name in instance
+        Removes the attribute identified by name in instance
         '''
         if attribute in instance.__attributes:
-            delattr(__class__,attribute)
+            delattr(instance.__class__,attribute)
             instance.__attributes.pop(attribute)
 
     @staticmethod
     def __remove_method__(method, instance):
         '''
-        Static method: removes the method identified by name in instance
+        Removes the method identified by name in instance
         '''
         if method in instance.__methods:
-            delattr(__class__,method)
+            delattr(self.__class__,method)
             instance.__methods.pop(method)
