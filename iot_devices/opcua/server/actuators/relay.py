@@ -1,12 +1,14 @@
 #relay.py
 from .actuator import sOPCUA_Actuator
 import RPi.GPIO as GPIO
+import loggings
 
 class sOPCUA_Relay(sOPCUA_Actuator):
     """
         Class to manage a RELAY actuator into an OPCUA server
     """
     def __init__(self, pin, tag):
+        logging.debug("INIT %s(%s,%s) into %s" % (__class__,pin,tag,self))
         super().__init__("RELAY", tag)
         self.__pin = pin
 
@@ -19,7 +21,9 @@ class sOPCUA_Relay(sOPCUA_Actuator):
         
     
     def __turn_on__(self, parent, ua_parent):
+        logging.debug("RELAY[%s] turning on" % self)
         GPIO.output(self.__pin, GPIO.HIGH)
 
     def __turn_off__(self, parent, ua_parent):
+        logging.debug("RELAY[%s] turning off" % self)
         GPIO.output(self.__pin, GPIO.LOW)

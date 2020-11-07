@@ -1,6 +1,6 @@
 #actuator.py
 from ..device import sOPCUA_Device
-
+import logging
 
 class sOPCUA_Actuator(sOPCUA_Device):
     """
@@ -13,12 +13,6 @@ class sOPCUA_Actuator(sOPCUA_Device):
     MKEY_TURN_ON = 'turn_on'
     MKEY_TURN_OFF = 'turn_off'
 
-    # class_init({},
-    #                          {MKEY_TURN_ON:{'input':[],'output':[]},
-    #                           MKEY_TURN_OFF:{'input':[],'output':[]}
-    #                          })
-
-
     def __init__(self, category, tag):
         """
             Constructor.
@@ -29,6 +23,7 @@ class sOPCUA_Actuator(sOPCUA_Device):
 
             tag      string identifier for the actuator
         """
+        logging.debug("INIT %s(%s,%s) into %s" % (__class__,category,tag,self))
         super().__init__(
                         category, 
                         tag, 

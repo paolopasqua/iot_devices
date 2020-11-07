@@ -38,17 +38,8 @@ class sOPCUA_DHT(sOPCUA_Device):
     STATE_FREEZED = "Freezed"
     STATE_RUNNING = "Running"
     STATE_READING = "Reading"
-    
-    # sOPCUA_Device.class_init({KEY_TEMPERATURE:ua.VariantType.Int64,
-    #                           KEY_HUMIDITY:ua.VariantType.Int64,
-    #                           KEY_REFRESH_TIME:ua.VariantType.Int64
-    #                          },
-    #                          {MKEY_START:{'input':[],'output':[]},
-    #                           MKEY_FREEZE:{'input':[],'output':[]},
-    #                           MKEY_UPDATE_REFRESH_TIME:{'input':get_update_refresh_time_input(),'output':get_update_refresh_time_output()}
-    #                          })
 
-    def __init__(self, model: "DHT11/DHT22 constants", tag: str, pin: "board constants"):
+    def __init__(self, model: "DHT11/DHT22 constants", tag: str, pin: "board constants in str"):
         """
             Constructor.
 
@@ -60,6 +51,7 @@ class sOPCUA_DHT(sOPCUA_Device):
 
             pin:      board library constants: the pin of the board used for data
         """
+        logging.debug("INIT %s(%s,%s,%s) into %s" % (__class__,model,tag,pin,self))
         super().__init__(
                         model, 
                         tag,
@@ -84,27 +76,9 @@ class sOPCUA_DHT(sOPCUA_Device):
         self.freeze.connect(self.__freeze__)
         self.update_refresh_time.connect(self.__update_refresh_time__)
 
-
         self.timing_cond = threading.Condition()
         self.updater = threading.Thread(name=self.name, target=self.__thread_job__, args=(self.timing_cond,))
         self.freeze_state = False
-    
-    # def build_object(self, idx, opcua_object):
-    #     self.append_component_to_server(idx, KEY_REFRESH_TIME, opcua_object.add_property(idx, KEY_REFRESH_TIME, self.refresh_time, ua.VariantType.Int64))
-    #     self.append_component_to_server(idx, KEY_TEMPERATURE, opcua_object.add_property(idx, KEY_TEMPERATURE, 0.0))
-    #     self.append_component_to_server(idx, KEY_HUMIDITY, opcua_object.add_property(idx, KEY_HUMIDITY, 0.0))
-
-    #     input_arg = ua.Argument()
-    #     input_arg.Name = "seconds"
-    #     input_arg.DataType = ua.NodeId(ua.VariantType.Int64.value)
-
-    #     output_arg = ua.Argument()
-    #     output_arg.Name = "result"
-    #     output_arg.DataType = ua.NodeId(ua.VariantType.Boolean.value)
-
-    #     opcua_object.add_method(idx, "update_refresh_time", self.__update_refresh_time__, [input_arg], [output_arg])
-    #     opcua_object.add_method(idx, "start", self.__start__, [], [])
-    #     opcua_object.add_method(idx, "freeze", self.__freeze__, [], [])
 
     def __del__(self):
         if getattr(self,'device',None):
@@ -112,18 +86,6 @@ class sOPCUA_DHT(sOPCUA_Device):
             self.device = None
         super().__del__()
 
-    # def start(self):
-    #     """
-    #         Start the reading data thread.
-    #     """
-    #     self.__start__(None)
-    
-    # def freeze(self):
-    #     """
-    #         Stop the reading data thread
-    #     """
-    #     self.__freeze__(None)
-    
     def __start__(self, parent, ua_parent):
         """
             Start the reading data thread. This method is called even from OPCUA clients.
@@ -144,12 +106,13 @@ class sOPCUA_DHT(sOPCUA_Device):
             Updates the refresh time of reading data and notify change to servers.
         """
         try:
+            logging.debug("DHT[%s] updating refresh time" % self)
             self.refresh_time = seconds.Value
             with self.timing_cond:
                 self.timing_cond.notify()
             return True
         except Exception as error:
-            logging.error(error)
+            logging.error("DHT[%s] %s" % (self,error))
             return False
 
     def __thread_job__(self, timing_cond):
@@ -158,30 +121,33 @@ class sOPCUA_DHT(sOPCUA_Device):
 
             @param timing_cond  condition to control the execution
         """
+        logging.debug("DHT[%s] started" % self)
         self.state = self.STATE_RUNNING
 
         while not self.freeze_state:
             self.__update_data__()
             self.state = self.STATE_RUNNING
             with timing_cond:
+                logging.debug("DHT[%s] waiting" % self)
                 timing_cond.wait(self.refresh_time)
 
+        logging.debug("DHT[%s] stopped" % self)
         self.state = self.STATE_FREEZED
 
     def __update_data__(self):
         """
             Read updated data from sensor and update value to OPCUA servers.
         """
+        logging.debug("DHT[%s] starting reading" % self)
         self.state = self.STATE_READING
         read = False
         while not read:
             try:
                 self.temperature = self.device.temperature
                 self.humidity = self.device.humidity
+                logging.debug("DHT[%s] readed temp: %d ; hum: %d" % (self,self.temperature,self.humidity))
                 read = True
             except Exception as error:
                 # Errors happen fairly often, DHT's are hard to read, just keep going
-                logging.error(error)
+                logging.error("DHT[%s] %s" % (self,error))
                 read = False
-        # self.update_component_value(KEY_TEMPERATURE, temperature)
-        # self.update_component_value(KEY_HUMIDITY, humidity)
