@@ -64,7 +64,6 @@ class DynamicMethod():
 
         def __call__(self, *args, **kwargs):
             for m in self.__methods:
-                print(m,self.__parent,*args,**kwargs)
                 m(self.__parent, *args, **kwargs)
 
 

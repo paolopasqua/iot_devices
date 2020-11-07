@@ -1,7 +1,7 @@
 #relay.py
 from .actuator import sOPCUA_Actuator
 import RPi.GPIO as GPIO
-import loggings
+import logging
 
 class sOPCUA_Relay(sOPCUA_Actuator):
     """
